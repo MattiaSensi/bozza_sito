@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Members – Modellistica Socio-Epidemiologica</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+</head>
+<body>
+  <header id="site-header"></header>
+  <main>
+    <div class="wrap">
+      <h1>Members</h1>
+      <p>Membership requires being a UMI member; applications are made through the UMI website. The group aims to promote comparison and collaboration among researchers who use mathematical, statistical and computational methods to model socio-epidemiological questions.</p>
+
+      <h2>Where our members are</h2>
+      <p class="meta">Click a marker to see the member and open their page. Zoom in to separate nearby members (most are in Italy).</p>
+      <div class="map-controls">
+        <button type="button" id="btn-world">World</button>
+        <button type="button" id="btn-italy">Italy</button>
+      </div>
+      <div id="members-map" role="region" aria-label="World map of MSE members"></div>
+
+      <h2>All members</h2>
+      <ul class="members-list" id="members-list"></ul>
+
+      <h2>In memoriam</h2>
+      <p>The page remembers Maurizio Falcone, a founding member of the group who died in November 2022. He was a professor of numerical analysis at Sapienza University of Rome, a researcher with wide interests, and a colleague who encouraged people at every career stage. He spoke at the 2022 CIME school on mathematical modelling for epidemiology in Cetraro. The note is signed by the steering committee: Dimitri Breda, Fasma Diele, Andrea Pugliese, Cinzia Soresina and Mattia Zanella.</p>
+    </div>
+  </main>
+  <footer id="site-footer"></footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="site.js"></script>
+  <script>
+    // [name, institution, personal page, latitude, longitude]
+    // Coordinates are the city of each institution. Members in the same city are spread out by the map when zoomed in.
+    var MEMBERS = [
+      ["Giacomo Albi", "University of Verona", "https://www.di.univr.it/?ent=persona&id=35835&lang=it", 45.4384, 10.9916],
+      ["Fabio Ancona", "University of Padova", "https://www.math.unipd.it/~ancona/", 45.4064, 11.8768],
+      ["Alessia Andò", "GSSI, L'Aquila", "https://www.gssi.it/people/post-doc/post-doc-maths/item/14652-ando-alessia", 42.3498, 13.3995],
+      ["Fabio Bagagiolo", "University of Trento", "http://www.science.unitn.it/~bagagiol/", 46.0748, 11.1217],
+      ["Giulia Bertaglia", "University of Ferrara", "https://docente.unife.it/giulia.bertaglia", 44.8381, 11.6191],
+      ["Marzia Bisi", "University of Parma", "https://personale.unipr.it/it/ugovdocenti/person/20735", 44.8015, 10.3279],
+      ["Dimitri Breda", "University of Udine – CDLab", "https://users.dimi.uniud.it/~dimitri.breda/", 46.0711, 13.2346],
+      ["Iulia Martina Bulai", "University of Torino", "https://iuliamartinabulai.github.io/#!/research", 45.0703, 7.6869],
+      ["Bruno Buonomo", "University of Naples Federico II", "http://www.brunobuonomo.altervista.org/", 40.8518, 14.2681],
+      ["Alessandro Camasta", "University of Bari Aldo Moro", "https://www.researchgate.net/profile/Alessandro-Camasta", 41.1171, 16.8719],
+      ["Francesca Carfora", "IAC-CNR, Roma", "https://sites.google.com/view/francescacarfora/home", 41.9028, 12.4964],
+      ["Giuseppe Maria Coclite", "Politecnico of Bari", "https://sites.google.com/site/coclitegm/", 41.1171, 16.8719],
+      ["Pierluigi Colli", "University of Pavia", "http://www-dimat.unipv.it/pier/", 45.1847, 9.1582],
+      ["Rinaldo M. Colombo", "University of Brescia", "http://rinaldo.unibs.it/", 45.5416, 10.2118],
+      ["Fasma Diele", "IAC-CNR, Bari", "https://users.ba.cnr.it/iac/irmafd03/", 41.1171, 16.8719],
+      ["Simone De Reggi", "University of Udine", "https://www.dmif.uniud.it/dottorato/smf/dottorandi/simone-de-reggi/", 46.0711, 13.2346],
+      ["Salvatore Federico", "University of Genova", "https://economia.unige.it/node/1069", 44.4056, 8.9463],
+      ["Giorgio Ferrari", "Bielefeld University", "https://sites.google.com/site/giorgioferrariswebsite/", 52.0302, 8.5325],
+      ["Giuseppe Floridia", "University of Naples Federico II", "http://wpage.unina.it/giuseppe.floridia/", 40.8518, 14.2681],
+      ["Genni Fragnelli", "University of Bari", "https://www.dm.uniba.it/members/fragnelli", 41.1171, 16.8719],
+      ["Jonathan Franceschi", "University of Pavia", "https://matematica.unipv.it/elenco/franceschi-jonathan/", 45.1847, 9.1582],
+      ["Gaetana Gambino", "University of Palermo", "https://www.unipa.it/persone/docenti/g/gaetana.gambino", 38.1157, 13.3615],
+      ["Mauro Garavello", "University of Milano Bicocca", "https://www.unimib.it/mauro-garavello", 45.5172, 9.2117],
+      ["Marino Gatto", "Politecnico of Milano", "https://gatto.faculty.polimi.it/", 45.5040, 9.1569],
+      ["Maurizio Grasselli", "Politecnico of Milano", "https://www.mate.polimi.it/?view=pp&id=39&lg=it#ann", 45.5040, 9.1569],
+      ["Maria Groppi", "University of Parma", "https://personale.unipr.it/it/ugovdocenti/person/19524", 44.8015, 10.3279],
+      ["Annalisa Iuorio", "Parthenope University of Naples", "https://annalisaiuorio.com/", 40.8397, 14.2480],
+      ["Deborah Lacitignola", "University of Cassino", "https://www.unicas.it/didattica/docenti/schedadocente.aspx?nome_cognome=deborah_lacitignola", 41.4930, 13.8270],
+      ["Davide Liessi", "University of Udine", "http://www.liessi.it/en/mathematics", 46.0711, 13.2346],
+      ["Elena Loli Piccolomini", "University of Bologna", "https://www.unibo.it/sitoweb/elena.loli", 44.4949, 11.3426],
+      ["Maria Carmela Lombardo", "University of Palermo", "https://www.unipa.it/persone/docenti/l/mariacarmela.lombardo", 38.1157, 13.3615],
+      ["Nadia Loy", "Politecnico of Torino", "https://www.researchgate.net/profile/Nadia-Loy", 45.0628, 7.6625],
+      ["Pierangelo Marcati", "GSSI, L'Aquila", "https://www.gssi.it/index.php/people/professors/lectures-maths/item/218-marcati-pierangelo", 42.3498, 13.3995],
+      ["Francesca Marcellini", "University of Brescia", "https://sites.google.com/view/francescamarcellini", 45.5416, 10.2118],
+      ["Marco Menale", "University of Naples Federico II", "https://www.docenti.unina.it/marco.menale", 40.8518, 14.2681],
+      ["Alessandra Micheletti", "University of Milano", "http://www.mat.unimi.it/users/michel/", 45.4727, 9.1957],
+      ["Roberto Natalini", "IAC-CNR, Roma", "https://www.iac.cnr.it/~natalini/", 41.9028, 12.4964],
+      ["Filippo Notarnicola", "IAC-CNR, Roma", "https://www.iac.rm.cnr.it/iacsite/index.php?page=people&id=50", 41.9028, 12.4964],
+      ["Alessio Oliviero", "Sapienza University of Rome", "https://phd.uniroma1.it/web/ALESSIO-OLIVIERO_nP1698318_IT.aspx", 41.9040, 12.5140],
+      ["Damiano Pasetto", "University Ca' Foscari of Venice", "https://www.unive.it/data/persone/21736721", 45.4337, 12.3266],
+      ["Andrea Pugliese", "University of Trento", "https://www.science.unitn.it/~pugliese/", 46.0748, 11.1217],
+      ["Alfio Quarteroni", "Politecnico of Milano", "https://mox.polimi.it/people/alfio-quarteroni/", 45.5040, 9.1569],
+      ["Elena Rossi", "University of Modena and Reggio Emilia", "https://sites.google.com/site/aelenarossi/", 44.6471, 10.9252],
+      ["Francesco Rossi", "University of Padova", "http://docenti.math.unipd.it/rossifr/", 45.4064, 11.8768],
+      ["Giulia Rotundo", "Sapienza University of Rome", "https://sites.google.com/a/uniroma1.it/giuliarotundo/home", 41.9040, 12.5140],
+      ["Marco Sammartino", "University of Palermo", "https://www.unipa.it/persone/docenti/s/marcomarialuigi.sammartino", 38.1157, 13.3615],
+      ["Francesca Scarabel", "University of Leeds, UK", "https://sites.google.com/view/scarabelfrancesca/home", 53.8067, -1.5550],
+      ["Mattia Sensi", "Politecnico of Torino", "https://mattiasensi.github.io/", 45.0703, 7.6869],
+      ["Cinzia Soresina", "University of Trento", "https://sites.google.com/view/dr-cinzia-soresina/home", 46.0748, 11.1217],
+      ["Sara Sottile", "University of Bologna", "https://sarasottile.github.io/", 44.4949, 11.3426],
+      ["Isabella Torcicollo", "IAC-CNR, Roma", "https://sites.google.com/view/isabellatorcicollo", 41.9028, 12.4964],
+      ["Andrea Tosin", "Politecnico of Torino", "https://staff.polito.it/andrea.tosin/", 45.0703, 7.6869],
+      ["Rossana Vermiglio", "University of Udine – CDLab", "https://users.dimi.uniud.it/~rossana.vermiglio/", 46.0711, 13.2346],
+      ["Alex Viguerie", "University of Urbino", "https://www.gssi.it/people/post-doc/post-doc-maths/item/11289-viguerie-alex", 43.7262, 12.6365],
+      ["Mattia Zanella", "University of Pavia", "http://www.mattiazanella.eu/", 45.1847, 9.1582]
+    ];
+
+    // Map
+    var map = L.map("members-map", { minZoom: 2, worldCopyJump: true }).setView([25, 10], 2);
+    // Esri World Street Map: no API key needed.
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19,
+      attribution: "Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors"
+    }).addTo(map);
+
+    var cluster = L.markerClusterGroup({ spiderfyOnMaxZoom: true, showCoverageOnHover: false });
+    MEMBERS.forEach(function (m) {
+      var marker = L.marker([m[3], m[4]], { title: m[0] });
+      marker.bindPopup(
+        "<strong>" + m[0] + "</strong><br>" + m[1] +
+        '<br><a href="' + m[2] + '" target="_blank" rel="noopener">Personal page</a>'
+      );
+      cluster.addLayer(marker);
+    });
+    map.addLayer(cluster);
+
+    document.getElementById("btn-world").addEventListener("click", function () {
+      map.setView([25, 10], 2);
+    });
+    document.getElementById("btn-italy").addEventListener("click", function () {
+      map.fitBounds([[36.6, 6.6], [47.1, 18.6]]);
+    });
+
+    // Members list (same data, sorted by surname)
+    var sorted = MEMBERS.slice().sort(function (a, b) {
+      var sa = a[0].split(" ").slice(-1)[0], sb = b[0].split(" ").slice(-1)[0];
+      return sa.localeCompare(sb);
+    });
+    var ul = document.getElementById("members-list");
+    sorted.forEach(function (m) {
+      var li = document.createElement("li");
+      var a = document.createElement("a");
+      a.href = m[2];
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = m[0];
+      li.appendChild(a);
+      var inst = document.createElement("span");
+      inst.className = "inst";
+      inst.textContent = m[1];
+      li.appendChild(inst);
+      ul.appendChild(li);
+    });
+  </script>
+</body>
+</html>
